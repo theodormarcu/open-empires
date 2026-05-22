@@ -96,6 +96,29 @@ export const UNIT_STATS = {
   },
 } as const;
 
+// ============================================================================
+// Weather Effects
+// ============================================================================
+
+export const WEATHER = {
+  RAIN_MAX_PARTICLES: IS_MOBILE ? 80 : 300,
+  RAIN_SPEED: 12,
+  RAIN_DRIFT: 3,
+  RAIN_LENGTH: 14,
+
+  SNOW_MAX_PARTICLES: IS_MOBILE ? 60 : 250,
+  SNOW_SPEED: 2,
+  SNOW_WOBBLE: 0.5,
+
+  SAND_MAX_PARTICLES: IS_MOBILE ? 60 : 250,
+  SAND_SPEED: 10,
+  SAND_DRIFT: 2,
+
+  FOG_MAX_PARTICLES: IS_MOBILE ? 15 : 40,
+  FOG_SPEED: 0.5,
+  FOG_DRIFT: 0.3,
+} as const;
+
 export const BUILDING_STATS = {
   town_center: {
     health: 2400,
