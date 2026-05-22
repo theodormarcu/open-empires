@@ -5,3 +5,6 @@ export { PerformanceMonitor } from "./PerformanceMonitor";
 export { LayerManager, RenderLayer } from "./LayerManager";
 export { tileToScreen, screenToTile, getTileCenter } from "./isometric";
 export type { IsoPoint, TileCoord } from "./isometric";
+export { SpriteLoader } from "./SpriteLoader";
+export type { SpriteSheetConfig } from "./SpriteLoader";
+export { EntityRenderer } from "./EntityRenderer";
