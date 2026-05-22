@@ -128,4 +128,16 @@ export const BUILDING_STATS = {
     height: 2,
     buildTime: 35,
   },
+  archery_range: {
+    health: 1200,
+    width: 3,
+    height: 3,
+    buildTime: 50,
+  },
+  stables: {
+    health: 1350,
+    width: 3,
+    height: 3,
+    buildTime: 50,
+  },
 } as const;
