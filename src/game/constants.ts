@@ -94,6 +94,18 @@ export const UNIT_STATS = {
     attack: 10,
     armor: 2,
   },
+  infantry: {
+    health: 50,
+    speed: 0.85,
+    attack: 6,
+    armor: 1,
+  },
+  cavalry: {
+    health: 120,
+    speed: 1.5,
+    attack: 12,
+    armor: 2,
+  },
 } as const;
 
 export const BUILDING_STATS = {
@@ -127,5 +139,17 @@ export const BUILDING_STATS = {
     width: 2,
     height: 2,
     buildTime: 35,
+  },
+  archery_range: {
+    health: 1200,
+    width: 3,
+    height: 3,
+    buildTime: 50,
+  },
+  stables: {
+    health: 1200,
+    width: 3,
+    height: 3,
+    buildTime: 50,
   },
 } as const;

@@ -22,7 +22,7 @@ export interface Unit extends Entity {
   owner: number;
 }
 
-export type UnitType = "villager" | "militia" | "archer" | "knight";
+export type UnitType = "villager" | "militia" | "archer" | "knight" | "infantry" | "cavalry";
 
 export interface Building extends Entity {
   type: "building";
@@ -33,7 +33,7 @@ export interface Building extends Entity {
   isComplete: boolean;
 }
 
-export type BuildingType = "town_center" | "house" | "barracks" | "mill" | "lumber_camp";
+export type BuildingType = "town_center" | "house" | "barracks" | "mill" | "lumber_camp" | "archery_range" | "stables";
 
 export interface Resource extends Entity {
   type: "resource";

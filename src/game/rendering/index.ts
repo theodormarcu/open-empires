@@ -3,5 +3,7 @@ export { Tilemap, TerrainType } from "./Tilemap";
 export { TerrainSprites } from "./TerrainSprites";
 export { PerformanceMonitor } from "./PerformanceMonitor";
 export { LayerManager, RenderLayer } from "./LayerManager";
+export { SpriteLoader } from "./SpriteLoader";
+export { EntityRenderer } from "./EntityRenderer";
 export { tileToScreen, screenToTile, getTileCenter } from "./isometric";
 export type { IsoPoint, TileCoord } from "./isometric";

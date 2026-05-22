@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Application } from "pixi.js";
-import { Camera, Tilemap, TerrainSprites, PerformanceMonitor, LayerManager, RenderLayer } from "@/game/rendering";
+import { Camera, Tilemap, TerrainSprites, PerformanceMonitor, LayerManager, RenderLayer, EntityRenderer } from "@/game/rendering";
 import { tileToScreen } from "@/game/rendering/isometric";
 import { MAP_WIDTH, MAP_HEIGHT } from "@/game/constants";
+import { Game } from "@/game/Game";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -37,9 +38,49 @@ export function GameCanvas() {
       const layers = new LayerManager();
       const tilemap = new Tilemap(terrainSprites);
       const perfMonitor = isDev ? new PerformanceMonitor() : null;
-      
+
+      // Initialize game and entity renderer
+      const game = new Game(app);
+      const entityRenderer = new EntityRenderer(
+        layers.getLayer(RenderLayer.UNITS),
+        layers.getLayer(RenderLayer.BUILDINGS)
+      );
+
+      // Spawn initial buildings near map center
+      const cx = Math.floor(MAP_WIDTH / 2);
+      const cy = Math.floor(MAP_HEIGHT / 2);
+
+      game.spawnBuilding("town_center", cx, cy, 1);
+      game.spawnBuilding("barracks", cx + 8, cy - 4, 1);
+      game.spawnBuilding("archery_range", cx - 6, cy + 6, 1);
+      game.spawnBuilding("stables", cx + 6, cy + 8, 1);
+
+      // Spawn units around the town center
+      game.spawnUnit("infantry", cx + 2, cy - 2, 1);
+      game.spawnUnit("infantry", cx + 3, cy - 2, 1);
+      game.spawnUnit("infantry", cx + 2, cy - 3, 1);
+      game.spawnUnit("archer", cx - 3, cy + 2, 1);
+      game.spawnUnit("archer", cx - 4, cy + 2, 1);
+      game.spawnUnit("archer", cx - 3, cy + 3, 1);
+      game.spawnUnit("cavalry", cx + 4, cy + 4, 1);
+      game.spawnUnit("cavalry", cx + 5, cy + 4, 1);
+      game.spawnUnit("cavalry", cx + 4, cy + 5, 1);
+
+      // Spawn a second player's base nearby
+      game.spawnBuilding("town_center", cx + 30, cy + 30, 2);
+      game.spawnBuilding("barracks", cx + 38, cy + 26, 2);
+      game.spawnBuilding("archery_range", cx + 24, cy + 36, 2);
+      game.spawnBuilding("stables", cx + 36, cy + 38, 2);
+
+      game.spawnUnit("infantry", cx + 32, cy + 28, 2);
+      game.spawnUnit("infantry", cx + 33, cy + 28, 2);
+      game.spawnUnit("archer", cx + 27, cy + 32, 2);
+      game.spawnUnit("archer", cx + 28, cy + 32, 2);
+      game.spawnUnit("cavalry", cx + 34, cy + 34, 2);
+      game.spawnUnit("cavalry", cx + 35, cy + 34, 2);
+
       // Center camera on map
-      const mapCenter = tileToScreen(MAP_WIDTH / 2, MAP_HEIGHT / 2);
+      const mapCenter = tileToScreen(cx, cy);
       camera.centerOn(mapCenter.x, mapCenter.y);
 
       // Add layer manager root to stage (contains all render layers)
@@ -96,12 +137,11 @@ export function GameCanvas() {
 
       // Game loop
       let frameCount = 0;
-      app.ticker.add((_ticker) => {
+      app.ticker.add((ticker) => {
         // Update performance monitor
         if (perfMonitor) {
           perfMonitor.update(performance.now());
           frameCount++;
-          // Update React state every 10 frames to avoid excessive re-renders
           if (frameCount % 10 === 0) {
             setPerfStats({
               fps: perfMonitor.getFPS(),
@@ -111,6 +151,9 @@ export function GameCanvas() {
             });
           }
         }
+
+        // Update game state
+        game.update(ticker.deltaTime);
 
         // Update camera size on resize
         camera.setScreenSize(app.screen.width, app.screen.height);
@@ -126,6 +169,10 @@ export function GameCanvas() {
 
         // Render tilemap (terrain layer)
         tilemap.render(camera);
+
+        // Render entities
+        entityRenderer.renderBuildings(game.getBuildings(), camera);
+        entityRenderer.renderUnits(game.getUnits(), camera);
       });
     };
 
