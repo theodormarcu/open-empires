@@ -4,20 +4,7 @@ import { tileToScreen } from './isometric';
 import { Camera } from './Camera';
 import { ZOOM_THRESHOLDS, ENTITY_LIMITS, TILE_WIDTH, TILE_HEIGHT, BUILDING_STATS } from '../constants';
 import type { Unit, Building, UnitType, BuildingType } from '../types';
-
-export interface SpriteDef {
-  sheet: string;
-  row: number;
-  col: number;
-  offsetX?: number;
-  offsetY?: number;
-}
-
-// Sprite definitions for units (populated when sprite sheets are generated)
-export const UNIT_SPRITES: Partial<Record<UnitType, SpriteDef>> = {};
-
-// Sprite definitions for buildings (populated when sprite sheets are generated)
-export const BUILDING_SPRITES: Partial<Record<BuildingType, SpriteDef>> = {};
+import { UNIT_SPRITES, BUILDING_SPRITES } from '../types';
 
 // Fallback colors for unit types
 const UNIT_COLORS: Record<UnitType, number> = {
@@ -34,6 +21,8 @@ const BUILDING_COLORS: Record<BuildingType, number> = {
   barracks: 0xe74c3c,
   mill: 0xf1c40f,
   lumber_camp: 0x8b4513,
+  archery_range: 0x2ecc71,
+  stables: 0x9b59b6,
 };
 
 export class EntityRenderer {

@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Application } from "pixi.js";
-import { Camera, Tilemap, TerrainSprites, PerformanceMonitor, LayerManager, RenderLayer } from "@/game/rendering";
+import { Camera, Tilemap, TerrainSprites, PerformanceMonitor, LayerManager, RenderLayer, SpriteLoader, EntityRenderer } from "@/game/rendering";
 import { tileToScreen } from "@/game/rendering/isometric";
 import { MAP_WIDTH, MAP_HEIGHT } from "@/game/constants";
+import { Game } from "@/game/Game";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -47,6 +48,33 @@ export function GameCanvas() {
       
       // Add tilemap to terrain layer
       layers.getLayer(RenderLayer.TERRAIN).addChild(tilemap.getContainer());
+
+      // Load entity sprite sheets
+      const spriteLoader = new SpriteLoader();
+      await spriteLoader.loadSpritesheet("units", {
+        path: "/assets/units_placeholder.png",
+        frameWidth: 64,
+        frameHeight: 64,
+        columns: 4,
+        rows: 1,
+      });
+      await spriteLoader.loadSpritesheet("buildings", {
+        path: "/assets/buildings_placeholder.png",
+        frameWidth: 128,
+        frameHeight: 128,
+        columns: 7,
+        rows: 1,
+      });
+
+      // Create entity renderer
+      const entityRenderer = new EntityRenderer(
+        layers.getLayer(RenderLayer.UNITS),
+        layers.getLayer(RenderLayer.BUILDINGS),
+        spriteLoader
+      );
+
+      // Initialize game and spawn initial entities
+      const game = new Game(app);
 
       // Input state
       let isDragging = false;
@@ -126,6 +154,13 @@ export function GameCanvas() {
 
         // Render tilemap (terrain layer)
         tilemap.render(camera);
+
+        // Update game state
+        game.update(_ticker.deltaTime);
+
+        // Render entities
+        entityRenderer.renderBuildings(game.getBuildings(), camera);
+        entityRenderer.renderUnits(game.getUnits(), camera);
       });
     };
 
