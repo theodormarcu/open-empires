@@ -96,6 +96,29 @@ export const UNIT_STATS = {
   },
 } as const;
 
+// ============================================================================
+// Weather Effects
+// ============================================================================
+
+export const WEATHER = {
+  /** Maximum weather particles */
+  MAX_PARTICLES: IS_MOBILE ? 80 : 300,
+  /** Rain fall speed (pixels/frame) */
+  RAIN_SPEED: 12,
+  /** Rain horizontal drift (pixels/frame) */
+  RAIN_DRIFT: 3,
+  /** Rain line length (pixels) */
+  RAIN_LENGTH: 14,
+  /** Snow fall speed (pixels/frame) */
+  SNOW_SPEED: 2,
+  /** Snow horizontal wobble amplitude (pixels) */
+  SNOW_WOBBLE: 0.5,
+  /** Sandstorm horizontal speed (pixels/frame) */
+  SAND_SPEED: 10,
+  /** Sandstorm vertical drift (pixels/frame) */
+  SAND_DRIFT: 2,
+} as const;
+
 export const BUILDING_STATS = {
   town_center: {
     health: 2400,

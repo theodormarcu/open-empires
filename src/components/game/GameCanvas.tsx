@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Application } from "pixi.js";
-import { Camera, Tilemap, TerrainSprites, PerformanceMonitor, LayerManager, RenderLayer } from "@/game/rendering";
+import { Camera, Tilemap, TerrainSprites, PerformanceMonitor, LayerManager, RenderLayer, WeatherSystem } from "@/game/rendering";
 import { tileToScreen } from "@/game/rendering/isometric";
 import { MAP_WIDTH, MAP_HEIGHT } from "@/game/constants";
 
@@ -12,9 +12,12 @@ export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<Application | null>(null);
   const [perfStats, setPerfStats] = useState({ fps: 0, frameTime: 0, lagSpikes: 0, status: "good" as "good" | "warning" | "bad" });
+  const [weatherLabel, setWeatherLabel] = useState<string>("none");
 
   useEffect(() => {
     if (!containerRef.current || appRef.current) return;
+
+    let keyDownHandler: ((e: KeyboardEvent) => void) | null = null;
 
     const initPixi = async () => {
       const app = new Application();
@@ -42,11 +45,17 @@ export function GameCanvas() {
       const mapCenter = tileToScreen(MAP_WIDTH / 2, MAP_HEIGHT / 2);
       camera.centerOn(mapCenter.x, mapCenter.y);
 
+      // Weather system (screen-space overlay, above all camera-transformed layers)
+      const weatherSystem = new WeatherSystem(app.screen.width, app.screen.height);
+
       // Add layer manager root to stage (contains all render layers)
       app.stage.addChild(layers.getRoot());
       
       // Add tilemap to terrain layer
       layers.getLayer(RenderLayer.TERRAIN).addChild(tilemap.getContainer());
+
+      // Weather overlay sits on top of everything (screen-space, not camera-transformed)
+      app.stage.addChild(weatherSystem.getContainer());
 
       // Input state
       let isDragging = false;
@@ -94,6 +103,15 @@ export function GameCanvas() {
         e.preventDefault();
       });
 
+      // Keyboard: W to cycle weather
+      keyDownHandler = (e: KeyboardEvent) => {
+        if (e.key === "w" || e.key === "W") {
+          const next = weatherSystem.cycleWeather();
+          setWeatherLabel(next);
+        }
+      };
+      window.addEventListener("keydown", keyDownHandler);
+
       // Game loop
       let frameCount = 0;
       app.ticker.add((_ticker) => {
@@ -126,12 +144,19 @@ export function GameCanvas() {
 
         // Render tilemap (terrain layer)
         tilemap.render(camera);
+
+        // Update weather particles (screen-space)
+        weatherSystem.setScreenSize(app.screen.width, app.screen.height);
+        weatherSystem.update(_ticker.deltaTime);
       });
     };
 
     initPixi();
 
     return () => {
+      if (keyDownHandler) {
+        window.removeEventListener("keydown", keyDownHandler);
+      }
       if (appRef.current) {
         appRef.current.destroy(true);
         appRef.current = null;
@@ -159,6 +184,11 @@ export function GameCanvas() {
           {perfStats.lagSpikes > 0 && (
             <div className="text-orange-400">
               Lag spikes: {perfStats.lagSpikes}
+            </div>
+          )}
+          {weatherLabel !== "none" && (
+            <div className="text-blue-300">
+              Weather: {weatherLabel}
             </div>
           )}
         </div>
