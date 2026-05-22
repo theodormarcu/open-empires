@@ -39,7 +39,9 @@ src/
 │       ├── Camera.ts       # Viewport with pan/zoom
 │       ├── Tilemap.ts      # Isometric terrain renderer
 │       ├── LayerManager.ts # Multi-layer rendering (terrain, units, effects, etc.)
-│       └── isometric.ts    # Coordinate conversion utilities
+│       ├── isometric.ts    # Coordinate conversion utilities
+│       ├── SpriteLoader.ts # Generic sprite sheet loader
+│       └── EntityRenderer.ts # Unit and building renderer (placeholder graphics)
 ├── scripts/
 │   └── generate-asset.ts   # AI sprite sheet generator (Gemini)
 └── lib/
@@ -54,6 +56,7 @@ src/
 - [x] Basic game type definitions
 - [x] Game constants defined
 - [x] **Phase 1 complete**: Isometric rendering with camera controls
+- [x] **Phase 2 in progress**: Entity system with units and buildings
 
 ## Completed Work
 
@@ -72,6 +75,14 @@ src/
 - [x] **Grass terrain** (`public/assets/grass_terrain.png`) — 4x4 seamless tile variants (1024x1024, 256px cells)
 - [x] **Water terrain** (`public/assets/water_terrain.png`) — Seamless water texture (1024x1024, 4x4 grid)
 - [x] **Asset generator improvements** (`scripts/generate-asset.ts`) — Added `terrain` style for seamless rectangular tiles, improved `aoe` style with detailed AOE2:DE art direction
+
+### Phase 2: Entity System (In Progress)
+- [x] **Entity types** (`types.ts`) — Added Infantry, Cavalry unit types; Archery Range, Stables building types
+- [x] **Entity stats** (`constants.ts`) — Stats for all unit types (health, speed, attack, armor) and building types (health, size, build time)
+- [x] **SpriteLoader** (`rendering/SpriteLoader.ts`) — Generic sprite sheet loader for future sprite assets
+- [x] **EntityRenderer** (`rendering/EntityRenderer.ts`) — Placeholder graphics rendering for units (colored diamonds with health bars) and buildings (isometric boxes with 3D roof effect)
+- [x] **Game state management** (`Game.ts`) — spawnUnit(), spawnBuilding(), getUnits(), getBuildings() methods
+- [x] **Initial entity spawning** (`GameCanvas.tsx`) — Two-player setup with buildings and units around map center
 
 ### Optional Isometric Enhancements (Future)
 | Feature | Priority | Description |
