@@ -13,6 +13,8 @@ export interface Entity {
 
 export type EntityType = "unit" | "building" | "resource";
 
+export type UnitState = "idle" | "moving" | "attacking" | "gathering";
+
 export interface Unit extends Entity {
   type: "unit";
   unitType: UnitType;
@@ -20,6 +22,7 @@ export interface Unit extends Entity {
   maxHealth: number;
   speed: number;
   owner: number;
+  state?: UnitState;
 }
 
 export type UnitType = "villager" | "militia" | "archer" | "knight";

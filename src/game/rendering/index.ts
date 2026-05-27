@@ -8,3 +8,4 @@ export type { IsoPoint, TileCoord } from "./isometric";
 export { SpriteLoader } from "./SpriteLoader";
 export type { SpriteSheetConfig } from "./SpriteLoader";
 export { EntityRenderer } from "./EntityRenderer";
+export { UnitRenderer } from "./UnitRenderer";
