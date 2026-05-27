@@ -9,7 +9,6 @@ import { Game } from "@/game/Game";
 import { SelectionManager } from "@/game/SelectionManager";
 
 const isDev = process.env.NODE_ENV === "development";
-const DRAG_THRESHOLD = 4;
 
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,18 +62,12 @@ export function GameCanvas() {
       // Input state
       let isRightDragging = false;
       let leftMouseDown = false;
-      let leftDownX = 0;
-      let leftDownY = 0;
-      let leftExceededThreshold = false;
       let lastMouseX = 0;
       let lastMouseY = 0;
 
       app.canvas.addEventListener("mousedown", (e) => {
         if (e.button === 0) {
           leftMouseDown = true;
-          leftDownX = e.clientX;
-          leftDownY = e.clientY;
-          leftExceededThreshold = false;
           lastMouseX = e.clientX;
           lastMouseY = e.clientY;
 
@@ -93,7 +86,7 @@ export function GameCanvas() {
       });
 
       app.canvas.addEventListener("mousemove", (e) => {
-        // Right-click drag always pans
+        // Right-click drag always pans camera
         if (isRightDragging) {
           const deltaX = e.clientX - lastMouseX;
           const deltaY = e.clientY - lastMouseY;
@@ -102,25 +95,10 @@ export function GameCanvas() {
           lastMouseY = e.clientY;
         }
 
+        // Left-click drag feeds into SelectionManager (box-select)
         if (leftMouseDown) {
-          const dx = e.clientX - leftDownX;
-          const dy = e.clientY - leftDownY;
-          if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
-            leftExceededThreshold = true;
-          }
-
           const rect = app.canvas.getBoundingClientRect();
           selectionManager.onMouseMove(e.clientX - rect.left, e.clientY - rect.top);
-
-          // If not box-selecting (shift not held and no box forming), pan
-          if (leftExceededThreshold && !selectionManager.exceedsDragThreshold()) {
-            const deltaX = e.clientX - lastMouseX;
-            const deltaY = e.clientY - lastMouseY;
-            camera.pan(deltaX, deltaY);
-          }
-
-          lastMouseX = e.clientX;
-          lastMouseY = e.clientY;
         }
       });
 
@@ -137,8 +115,10 @@ export function GameCanvas() {
       });
 
       app.canvas.addEventListener("mouseleave", () => {
+        if (leftMouseDown) {
+          selectionManager.cancelDrag();
+        }
         leftMouseDown = false;
-        leftExceededThreshold = false;
         isRightDragging = false;
       });
 

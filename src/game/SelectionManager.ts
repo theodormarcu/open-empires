@@ -71,17 +71,10 @@ export class SelectionManager {
     return true;
   }
 
-  /** Returns true when left-button drag should be consumed by selection (not camera pan) */
-  isSelectDragging(): boolean {
-    return this.isDragging;
-  }
-
-  /** Returns true when drag distance exceeds threshold (box selecting) */
-  exceedsDragThreshold(): boolean {
-    if (!this.isDragging) return false;
-    const dx = this.currentMouseX - this.mouseDownX;
-    const dy = this.currentMouseY - this.mouseDownY;
-    return Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD;
+  cancelDrag(): void {
+    this.isDragging = false;
+    this.isBoxSelecting = false;
+    this.overlayGraphics.clear();
   }
 
   renderBoxSelect(): void {
