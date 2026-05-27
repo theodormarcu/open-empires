@@ -40,7 +40,12 @@ export class Game {
     this.placeBuilding("archery_range", 55, 62, 1);
     this.placeBuilding("stables", 63, 55, 1);
 
-    // Spawn initial units
+    // Spawn Player 1 units
+    this.spawnUnit("villager", 61, 62, 1);
+    this.spawnUnit("villager", 62, 62, 1);
+    this.spawnUnit("villager", 63, 62, 1);
+    this.spawnUnit("villager", 61, 63, 1);
+    this.spawnUnit("villager", 62, 63, 1);
     this.spawnUnit("militia", 58, 58, 1);
     this.spawnUnit("militia", 58, 59, 1);
     this.spawnUnit("militia", 58, 60, 1);
@@ -49,6 +54,21 @@ export class Game {
     this.spawnUnit("archer", 62, 60, 1);
     this.spawnUnit("knight", 56, 56, 1);
     this.spawnUnit("knight", 57, 56, 1);
+
+    // Spawn Player 2 units (enemy) for color differentiation
+    const player2: Player = {
+      id: 2,
+      name: "Player 2",
+      color: 0xe74c3c,
+      resources: { wood: 200, food: 200, gold: 100, stone: 200 },
+    };
+    state.players.push(player2);
+
+    this.spawnUnit("militia", 70, 70, 2);
+    this.spawnUnit("militia", 71, 70, 2);
+    this.spawnUnit("archer", 72, 71, 2);
+    this.spawnUnit("villager", 70, 72, 2);
+    this.spawnUnit("villager", 71, 72, 2);
 
     return state;
   }
