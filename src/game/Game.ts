@@ -14,7 +14,7 @@ export class Game {
   }
 
   private createInitialState(): GameState {
-    const player: Player = {
+    const player1: Player = {
       id: 1,
       name: "Player 1",
       color: 0x3498db,
@@ -26,9 +26,21 @@ export class Game {
       },
     };
 
+    const player2: Player = {
+      id: 2,
+      name: "Player 2",
+      color: 0xe74c3c,
+      resources: {
+        wood: 200,
+        food: 200,
+        gold: 100,
+        stone: 200,
+      },
+    };
+
     const state: GameState = {
       tick: 0,
-      players: [player],
+      players: [player1, player2],
       entities: new Map(),
     };
 
@@ -40,7 +52,12 @@ export class Game {
     this.placeBuilding("archery_range", 55, 62, 1);
     this.placeBuilding("stables", 63, 55, 1);
 
-    // Spawn initial units
+    // Player 1 units
+    this.spawnUnit("villager", 61, 58, 1);
+    this.spawnUnit("villager", 62, 57, 1);
+    this.spawnUnit("villager", 63, 59, 1);
+    this.spawnUnit("villager", 59, 62, 1);
+    this.spawnUnit("villager", 60, 63, 1);
     this.spawnUnit("militia", 58, 58, 1);
     this.spawnUnit("militia", 58, 59, 1);
     this.spawnUnit("militia", 58, 60, 1);
@@ -49,6 +66,12 @@ export class Game {
     this.spawnUnit("archer", 62, 60, 1);
     this.spawnUnit("knight", 56, 56, 1);
     this.spawnUnit("knight", 57, 56, 1);
+
+    // Player 2 units (enemy, for color differentiation)
+    this.spawnUnit("militia", 45, 45, 2);
+    this.spawnUnit("militia", 46, 45, 2);
+    this.spawnUnit("archer", 47, 46, 2);
+    this.spawnUnit("knight", 44, 47, 2);
 
     return state;
   }
