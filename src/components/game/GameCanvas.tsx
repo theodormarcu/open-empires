@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Application } from "pixi.js";
-import { Camera, Tilemap, TerrainSprites, PerformanceMonitor, LayerManager, RenderLayer } from "@/game/rendering";
+import { Application, Graphics } from "pixi.js";
+import { Camera, Tilemap, TerrainSprites, PerformanceMonitor, LayerManager, RenderLayer, UnitRenderer } from "@/game/rendering";
 import { tileToScreen } from "@/game/rendering/isometric";
 import { MAP_WIDTH, MAP_HEIGHT } from "@/game/constants";
+import { Game } from "@/game/Game";
+import { SelectionManager } from "@/game/SelectionManager";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -32,52 +34,92 @@ export function GameCanvas() {
       const terrainSprites = new TerrainSprites();
       await terrainSprites.load();
 
-      // Initialize camera, layer manager, tilemap, and performance monitor
+      // Initialize core systems
       const camera = new Camera(app.screen.width, app.screen.height);
       const layers = new LayerManager();
       const tilemap = new Tilemap(terrainSprites);
       const perfMonitor = isDev ? new PerformanceMonitor() : null;
-      
+      const game = new Game(app);
+
+      // Unit renderer on the UNITS layer
+      const unitRenderer = new UnitRenderer(layers.getLayer(RenderLayer.UNITS));
+
+      // Selection overlay on UI_OVERLAY layer
+      const selectionOverlay = new Graphics();
+      layers.getLayer(RenderLayer.UI_OVERLAY).addChild(selectionOverlay);
+      const selectionManager = new SelectionManager(selectionOverlay, unitRenderer, camera);
+
       // Center camera on map
       const mapCenter = tileToScreen(MAP_WIDTH / 2, MAP_HEIGHT / 2);
       camera.centerOn(mapCenter.x, mapCenter.y);
 
-      // Add layer manager root to stage (contains all render layers)
+      // Add layer manager root to stage
       app.stage.addChild(layers.getRoot());
-      
+
       // Add tilemap to terrain layer
       layers.getLayer(RenderLayer.TERRAIN).addChild(tilemap.getContainer());
 
       // Input state
-      let isDragging = false;
+      let isRightDragging = false;
+      let leftMouseDown = false;
       let lastMouseX = 0;
       let lastMouseY = 0;
 
-      // Mouse events for panning
       app.canvas.addEventListener("mousedown", (e) => {
-        if (e.button === 0 || e.button === 2) {
-          isDragging = true;
+        if (e.button === 0) {
+          leftMouseDown = true;
+          lastMouseX = e.clientX;
+          lastMouseY = e.clientY;
+
+          const rect = app.canvas.getBoundingClientRect();
+          selectionManager.onMouseDown(
+            e.clientX - rect.left,
+            e.clientY - rect.top,
+            e.button,
+            e.shiftKey,
+          );
+        } else if (e.button === 2) {
+          isRightDragging = true;
           lastMouseX = e.clientX;
           lastMouseY = e.clientY;
         }
       });
 
       app.canvas.addEventListener("mousemove", (e) => {
-        if (isDragging) {
+        // Right-click drag always pans camera
+        if (isRightDragging) {
           const deltaX = e.clientX - lastMouseX;
           const deltaY = e.clientY - lastMouseY;
           camera.pan(deltaX, deltaY);
           lastMouseX = e.clientX;
           lastMouseY = e.clientY;
         }
+
+        // Left-click drag feeds into SelectionManager (box-select)
+        if (leftMouseDown) {
+          const rect = app.canvas.getBoundingClientRect();
+          selectionManager.onMouseMove(e.clientX - rect.left, e.clientY - rect.top);
+        }
       });
 
-      app.canvas.addEventListener("mouseup", () => {
-        isDragging = false;
+      app.canvas.addEventListener("mouseup", (e) => {
+        if (e.button === 0 && leftMouseDown) {
+          leftMouseDown = false;
+          const rect = app.canvas.getBoundingClientRect();
+          const units = game.getUnits();
+          selectionManager.onMouseUp(e.clientX - rect.left, e.clientY - rect.top, units);
+        }
+        if (e.button === 2) {
+          isRightDragging = false;
+        }
       });
 
       app.canvas.addEventListener("mouseleave", () => {
-        isDragging = false;
+        if (leftMouseDown) {
+          selectionManager.cancelDrag();
+        }
+        leftMouseDown = false;
+        isRightDragging = false;
       });
 
       // Scroll wheel for zoom
@@ -101,7 +143,6 @@ export function GameCanvas() {
         if (perfMonitor) {
           perfMonitor.update(performance.now());
           frameCount++;
-          // Update React state every 10 frames to avoid excessive re-renders
           if (frameCount % 10 === 0) {
             setPerfStats({
               fps: perfMonitor.getFPS(),
@@ -112,20 +153,25 @@ export function GameCanvas() {
           }
         }
 
-        // Update camera size on resize
         camera.setScreenSize(app.screen.width, app.screen.height);
-        
-        // Apply camera transform to all layers at once
+
         layers.applyCamera(
           app.screen.width,
           app.screen.height,
           camera.x,
           camera.y,
-          camera.zoom
+          camera.zoom,
         );
 
-        // Render tilemap (terrain layer)
+        // Render terrain
         tilemap.render(camera);
+
+        // Render units with selection info
+        const units = game.getUnits();
+        unitRenderer.render(units, camera, selectionManager.selectedIds);
+
+        // Render selection box overlay
+        selectionManager.renderBoxSelect();
       });
     };
 
